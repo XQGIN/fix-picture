@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>浮生 - 图片加密与解密工具</title>
+<link rel="icon" type="image/png" href="./icon/logo.png">
+
+<!-- ==================== 防爬虫机制 ==================== -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="bingbot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="slurp" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="baiduspider" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="yandex" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="applebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="facebookexternalhit" content="noindex, nofollow">
+<meta name="twitterbot" content="noindex, nofollow">
+<meta name="generator" content="FIXpictures - 图片混淆工具">
+<meta name="referrer" content="no-referrer">
+<meta name="format-detection" content="telephone=no">
+<meta name="format-detection" content="date=no">
+<meta name="format-detection" content="address=no">
+<meta name="format-detection" content="email=no">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' blob:; media-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+
+<!-- ==================== 外部库文件 ==================== -->
+<!-- EXIF 处理库 -->
+<script src="https://cdn.jsdelivr.net/npm/exif-js@2.3.0/exif.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/piexifjs@1.0.6/piexif.min.js"></script>
+
+<!-- ==================== 业务库文件 ==================== -->
+<!-- DOM 工具库（必须首先加载） -->
+<script src="./lib/dom-utils.js"></script>
+<!-- 加密解密库 -->
+<script src="./lib/crypto-utils.js"></script>
+<!-- 图片EXIF和元数据处理库 -->
+<script src="./lib/image-exif.js"></script>
+<!-- 刮刮乐效果库 -->
+<script src="./lib/scratch-effect.js"></script>
+<!-- 图片加载和处理核心库 -->
+<script src="./lib/image-handler.js"></script>
+<!-- UI事件处理库 -->
+<script src="./lib/ui-handler.js"></script>
+<!-- 液态玻璃效果核心库 -->
+<script src="./lib/glass-effect.js"></script>
+<!-- 液态玻璃效果设置界面库 -->
+<script src="./lib/glass-settings.js"></script>
+<!-- 背景管理器 -->
+<script src="./lib/background-manager.js"></script>
+<!-- 防爬虫机制 -->
+<script src="./lib/anti-crawler.js"></script>
+
+<!-- ==================== 样式文件 ==================== -->
+<link rel="stylesheet" href="./styles/main.css">
+<link rel="stylesheet" href="./styles/settings.css">
+<link rel="stylesheet" href="./styles/buttons.css">
+<link rel="stylesheet" href="./styles/image.css">
+<link rel="stylesheet" href="./styles/glass-effect.css">
+<link rel="stylesheet" href="./styles/background.css">
+
+<!-- 防止浏览器默认拖放行为 -->
+<script>
+// 防止默认拖拽行为并允许 drop 事件
+document.addEventListener('dragover', (e) => {
+    e.preventDefault()
+    e.dataTransfer.dropEffect = 'copy'
+})
+
+document.addEventListener('drop', (e) => {
+    e.preventDefault()
+})
+</script>
+</head>
+<body>
+    <!-- 动态背景容器 -->
+    <div class="background-container">
+        <div class="background-layer"></div>
+    </div>
+<div class="stage">
+<div class="container">
+    <div class="controls-card">
+        <button class="theme-toggle" id="theme-toggle" title="切换主题">🌙</button>
+        <h1>浮生图片混淆</h1>
+
+        <!-- ==================== 液态玻璃效果设置按钮 ==================== -->
+        <div class="glass-settings-button-container">
+            <button class="glass-settings-button" id="glass-settings-button" title="液态玻璃效果设置">
+                <span class="glass-icon">💎</span>
+                <span class="glass-text">玻璃效果</span>
+            </button>
+        </div>
+
+        <!-- ==================== 选项区域 ==================== -->
+        <div class="settings-container">
+            <div class="settings-panel">
+                <div class="settings-title">⚙️ 自动处理设置</div>
+                <div class="radio-group vertical">
+                    <div class="radio-option">
+                        <input type="radio" id="auto-none" name="auto-action" value="none" checked>
+                        <label for="auto-none">不处理</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="auto-encrypt" name="auto-action" value="encrypt">
+                        <label for="auto-encrypt">🔒 自动混淆</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="auto-decrypt" name="auto-action" value="decrypt">
+                        <label for="auto-decrypt">🔓 自动解混淆</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-panel">
+                <div class="settings-title">🎨 解密显示模式</div>
+                <div class="radio-group vertical">
+                    <div class="radio-option">
+                        <input type="radio" id="display-direct" name="display-mode" value="direct">
+                        <label for="display-direct">直接显示</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="display-scratch" name="display-mode" value="scratch" checked>
+                        <label for="display-scratch">🎫 刮刮乐效果</label>
+                    </div>
+                    <div class="radio-option">
+                        <input type="radio" id="display-scratch-transparent" name="display-mode" value="scratch-transparent">
+                        <label for="display-scratch-transparent">✨ 半透明刮刮乐</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ==================== 点击按钮区域 ==================== -->
+        <div class="button-group">
+            <span class="normal_button btn-select">
+                📁 选择图片
+                <input type="file" accept="image/*" id="ipt" class="ipt_btn" />
+            </span>
+            <button id="paste" class="normal_button btn-paste">📋 粘贴图片</button>
+            <button id="enc" class="normal_button btn-encrypt">🔒 混淆</button>
+            <button id="dec" class="normal_button btn-decrypt">🔓 解混淆</button>
+            <button id="re" class="normal_button btn-restore">↻ 还原</button>
+        </div>
+
+        <a class="external-link" href="https://floatlife.pages.dev/" target="_blank" rel="noopener noreferrer">🔗 浮生的个人博客站</a>
+
+    </div>
+</div>
+
+<!-- ==================== 液态玻璃效果设置面板 ==================== -->
+<div id="glass-settings-panel" class="glass-settings-panel" style="display: none;">
+    <div class="glass-settings-header">
+        <h3>💎 液态玻璃效果设置</h3>
+        <button class="glass-settings-close" id="glass-settings-close">✕</button>
+    </div>
+    
+    <div class="glass-settings-content">
+        <div class="glass-setting-group">
+            <label for="glass-blur">模糊强度</label>
+            <input type="range" id="glass-blur" min="0" max="20" value="10">
+            <span id="glass-blur-value">10px</span>
+        </div>
+        
+        <div class="glass-setting-group">
+            <label for="glass-opacity">透明度</label>
+            <input type="range" id="glass-opacity" min="0" max="100" value="30">
+            <span id="glass-opacity-value">30%</span>
+        </div>
+        
+        <div class="glass-setting-group">
+            <label for="glass-brightness">亮度</label>
+            <input type="range" id="glass-brightness" min="80" max="120" value="100">
+            <span id="glass-brightness-value">100%</span>
+        </div>
+        
+        <div class="glass-setting-group">
+            <label for="glass-saturation">饱和度</label>
+            <input type="range" id="glass-saturation" min="80" max="120" value="100">
+            <span id="glass-saturation-value">100%</span>
+        </div>
+        
+        <div class="glass-setting-group">
+            <label for="glass-color">色调</label>
+            <input type="color" id="glass-color" value="#667eea">
+        </div>
+        
+        <div class="glass-setting-group">
+            <label for="glass-effect-toggle">启用效果</label>
+            <input type="checkbox" id="glass-effect-toggle" checked>
+        </div>
+        
+        <div class="glass-settings-buttons">
+            <button class="glass-btn glass-btn-primary" id="glass-apply">应用设置</button>
+            <button class="glass-btn glass-btn-secondary" id="glass-reset">重置默认</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== 图片显示/加载区域（独立于 container） ==================== -->
+<div class="image-container" id="img-container">
+    <img id="display-img" style="display: none;" />
+    <div class="empty-state" id="empty-state">
+        拖拽图片到此处 / 点击选择 / 按 Ctrl+V 粘贴<br>
+        <small style="opacity: 0.7;">支持拖放、剪切板粘贴、文件选择</small>
+    </div>
+    <div class="processing-state" id="processing-state">正在处理图片</div>
+</div>
+
+<!-- ==================== 页脚信息 ==================== -->
+<footer class="app-footer">
+    <div class="footer-content">
+        <div class="footer-info">
+            <span class="footer-text">基于</span>
+            <a href="https://github.com/hayde0096/iead" target="_blank" rel="noopener noreferrer" class="github-link">
+                <svg class="github-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+                </svg>
+                hayde0096/iead
+            </a>
+            <span class="footer-text">制作</span>
+        </div>
+        <div class="footer-version">
+            <span class="version-text">v1.0</span>
+        </div>
+    </div>
+    
+    <!-- 个人项目归属地址 -->
+    <div class="footer-personal-project">
+        <a href="https://github.com/XQGIN/fix-picture" target="_blank" rel="noopener noreferrer" class="personal-github-link">
+            <svg class="github-icon" width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            XQGIN/fix-picture
+        </a>
+    </div>
+</footer>
+</div>
+
+<!-- ==================== 初始化脚本 ==================== -->
+<script src="./js/main.js"></script>
+</body>
+</html>

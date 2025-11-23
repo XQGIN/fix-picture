@@ -1,0 +1,54 @@
+# FIXpictures - 防爬虫配置
+# 禁止所有搜索引擎爬虫访问
+User-agent: *
+Disallow: /
+
+# 特别禁止常见搜索引擎爬虫
+User-agent: Googlebot
+Disallow: /
+
+User-agent: Bingbot
+Disallow: /
+
+User-agent: Slurp
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: YandexBot
+Disallow: /
+
+User-agent: Applebot
+Disallow: /
+
+User-agent: facebookexternalhit
+Disallow: /
+
+User-agent: Twitterbot
+Disallow: /
+
+# 禁止爬取所有文件类型
+Disallow: /*.html
+Disallow: /*.js
+Disallow: /*.css
+Disallow: /*.png
+Disallow: /*.jpg
+Disallow: /*.jpeg
+Disallow: /*.gif
+Disallow: /*.ico
+
+# 禁止爬取所有目录
+Disallow: /js/
+Disallow: /lib/
+Disallow: /styles/
+Disallow: /icon/
+
+# 禁止爬取所有参数URL
+Disallow: /*?*
+
+# 设置爬取延迟为最大值
+Crawl-delay: 10
+
+# 禁止站点地图索引
+Sitemap: none
