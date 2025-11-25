@@ -1,0 +1,74 @@
+# Cloudflare Pages 配置文件
+# FIXpictures 项目部署配置
+
+name = "fixpictures"
+compatibility_date = "2025-11-23"
+
+[env.production]
+# 生产环境配置
+
+# 页面配置
+pages_build_output_dir = "."
+
+# 环境变量（可选）
+# [env.production.vars]
+# ANTI_CRAWLER_ENABLED = "true"
+# LOG_LEVEL = "info"
+
+# 自定义域名（部署后设置）
+# [[route]]
+# pattern = "fixpictures.example.com/*"
+# custom_domain = true
+
+# 部署设置
+[deployments]
+# 生产环境部署
+production = {}
+
+# 构建命令（如果需要构建）
+# [build]
+# command = "npm run build"
+# publish = "dist"
+
+# 函数配置（用于Worker）
+[functions]
+directory = "."
+
+# 安全头配置
+[[headers]]
+url = "/*"
+
+[headers.values]
+X-Frame-Options = "DENY"
+X-Content-Type-Options = "nosniff"
+Referrer-Policy = "no-referrer"
+Permissions-Policy = "geolocation=(), microphone=(), camera=()"
+X-Robots-Tag = "noindex, nofollow, noarchive"
+
+# 特定文件的缓存策略
+[[headers]]
+url = "/*.html"
+
+[headers.values]
+Cache-Control = "no-store, no-cache, must-revalidate"
+Pragma = "no-cache"
+Expires = "0"
+
+[[headers]]
+url = "/*.js"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+url = "/*.css"
+
+[headers.values]
+Cache-Control = "public, max-age=31536000"
+
+[[headers]]
+url = "/robots.txt"
+
+[headers.values]
+Cache-Control = "public, max-age=3600"
+X-Robots-Tag = "noindex, nofollow"
