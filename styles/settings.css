@@ -4,7 +4,7 @@
     flex-direction: row;
     gap: 20px;
     margin-bottom: 12px;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     justify-content: center;
     align-items: flex-start;
 }
@@ -230,4 +230,53 @@ body:not(.light-mode) .radio-option label {
 .radio-option input[type="radio"]:checked + label {
     color: #667eea;
     font-weight: 600;
+}
+
+/* ==================== 响应式设计优化 ==================== */
+/* 中等屏幕尺寸（平板设备） */
+@media (max-width: 1024px) and (min-width: 769px) {
+    .settings-container {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+    
+    .settings-panel {
+        flex: 0 1 calc(50% - 8px);
+        min-width: 240px;
+        max-width: none;
+        padding: 16px;
+    }
+    
+    .settings-title {
+        font-size: 0.85rem;
+        margin-bottom: 10px;
+    }
+    
+    .radio-group.vertical .radio-option {
+        padding: 10px 14px;
+        font-size: 0.9rem;
+    }
+}
+
+/* 小屏幕平板设备 */
+@media (max-width: 900px) and (min-width: 769px) {
+    .settings-container {
+        gap: 12px;
+    }
+    
+    .settings-panel {
+        flex: 0 1 calc(50% - 6px);
+        min-width: 220px;
+        padding: 14px;
+    }
+    
+    .settings-title {
+        font-size: 0.82rem;
+    }
+    
+    .radio-group.vertical .radio-option {
+        padding: 8px 12px;
+        font-size: 0.88rem;
+    }
 }

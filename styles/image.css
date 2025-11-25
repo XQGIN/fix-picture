@@ -13,6 +13,8 @@
     width: var(--stage-width);
     max-width: var(--stage-width);
     margin: 0 auto;
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
+    touch-action: manipulation; /* 优化触摸响应 */
 }
 
 body:not(.light-mode) .image-container {
@@ -42,11 +44,44 @@ body.light-mode .image-container {
     border-radius: 12px;
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
+    -webkit-user-drag: none; /* 防止图片拖拽 */
+    user-select: none; /* 防止图片选择 */
+    -webkit-tap-highlight-color: transparent; /* 移除移动端点击高亮 */
 }
 
 #display-img:hover {
     transform: scale(1.02);
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* 移动端图片优化 */
+@media (max-width: 768px) {
+    #display-img {
+        max-height: 60vh;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    #display-img:hover {
+        transform: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .image-container.drag-over {
+        transform: scale(1.01);
+    }
+}
+
+/* 触摸设备优化 */
+@media (hover: none) and (pointer: coarse) {
+    #display-img:hover {
+        transform: none;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .image-container.drag-over {
+        transform: scale(1.01);
+    }
 }
 
 .empty-state {
